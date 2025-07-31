@@ -1,0 +1,18 @@
+services:
+  textgrab:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: textgrab
+    ports:
+      - "8000:8000"
+    volumes:
+      - /mnt/sec/apps/textgrab/uploads:/app/uploads
+      - /mnt/sec/apps/textgrab/exports:/app/exports
+    # environment:
+    #   SMTP_HOST: smtp.sendgrid.net         # Optional: Only required if using email
+    #   SMTP_PORT: 587
+    #   SMTP_USER: apikey
+    #   SMTP_PASS: ${SMTP_PASS}              # Set in .env or GitHub secrets
+    #   SENDER_EMAIL: noreply@threeminuteslab.com
+    restart: unless-stopped
