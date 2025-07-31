@@ -1,4 +1,4 @@
-import fitz  # PyMuPDF
+import fitz
 from PIL import Image
 from pdf2image import convert_from_path
 import pytesseract
@@ -18,7 +18,6 @@ def extract_from_pdf(path: str) -> str:
     text = "\n".join(page.get_text() for page in doc)
     if text.strip():
         return text.strip()
-    # fallback to OCR if PDF is image-based
     images = convert_from_path(path)
     return "\n".join(pytesseract.image_to_string(img) for img in images)
 

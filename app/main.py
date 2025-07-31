@@ -1,34 +1,33 @@
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import FileResponse
 import os
 from app.extract import extract_text
-from app.utils import save_file, generate_uid
 
 app = FastAPI()
 UPLOAD_DIR = "uploads"
-EXPORT_DIR = "exports"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
-os.makedirs(EXPORT_DIR, exist_ok=True)
 
 @app.get("/")
 def root():
-    return {"message": "Text Extractor API", "version": "1.0"}
+    return {"message": "Text Extractor is running."}
 
-@app.post("/extract_and_download/")
-async def extract_and_download(file: UploadFile = File(...)):
-    uid = generate_uid()
-    input_path = save_file(file, UPLOAD_DIR)
-    text = extract_text(input_path)
-    
-    output_path = os.path.join(EXPORT_DIR, f"{uid}.txt")
-    with open(output_path, "w", encoding="utf-8") as f:
+@app.post("/extract/")
+async def extract(file: UploadFile = File(...)):
+    input_path = os.path.join(UPLOAD_DIR, file.filename)
+
+    # Save uploaded file
+    with open(input_path, "wb") as f:
+        f.write(await file.read())
+
+    try:
+        # Extract text
+        text = extract_text(input_path)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Extraction failed: {str(e)}")
+
+    # Write to a text file in same dir
+    txt_path = os.path.splitext(input_path)[0] + ".txt"
+    with open(txt_path, "w", encoding="utf-8") as f:
         f.write(text)
 
-    return FileResponse(output_path, media_type="text/plain", filename=f"{uid}.txt")
-
-@app.get("/export/{uid}")
-def export_file(uid: str):
-    path = os.path.join(EXPORT_DIR, f"{uid}.txt")
-    if not os.path.exists(path):
-        raise HTTPException(status_code=404, detail="File not found")
-    return FileResponse(path, media_type="text/plain", filename=f"{uid}.txt")
+    return FileResponse(txt_path, media_type="text/plain", filename=os.path.basename(txt_path))

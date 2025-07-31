@@ -2,7 +2,6 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# System dependencies for OCR
 RUN apt-get update && apt-get install -y \
     tesseract-ocr \
     poppler-utils \
