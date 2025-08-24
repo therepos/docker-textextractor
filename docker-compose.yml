@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   text-extractor:
-    image: ghcr.io/therepos/docker-textgrab:latest
+    image: ghcr.io/therepos/textgrab:latest
     container_name: textgrab
     ports:
       - "8000:8000"
